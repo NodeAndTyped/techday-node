@@ -12,7 +12,7 @@ import {ServerLoader, ServerSettings} from "ts-express-decorators";
 
 @ServerSettings({
     acceptMimes: ["application/json"],
-    debug: process.NODE_ENV !== "production"
+    debug: process.env.NODE_ENV !== "production"
 })
 export class Server extends ServerLoader {
 
@@ -50,7 +50,7 @@ import {ServerLoader, ServerSettings, GlobalAcceptMimesMiddleware} from "ts-expr
 
 @ServerSettings({
     acceptMimes: ["application/json"],
-    debug: process.NODE_ENV !== "production"
+    debug: process.env.NODE_ENV !== "production"
 })
 export class Server extends ServerLoader {
     $onMountingMiddlewares() {
@@ -76,7 +76,7 @@ Voici comment configurer le moteur de template avec Express et Ts.ED:
 ```typescript
 @ServerSettings({
     acceptMimes: ["application/json"],
-    debug: process.NODE_ENV !== "production"
+    debug: process.env.NODE_ENV !== "production"
 })
 export class Server extends ServerLoader {
     $onMountingMiddlewares() {
