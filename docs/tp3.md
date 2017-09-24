@@ -13,7 +13,7 @@ La partie est terminée lorsque l’un des joueurs atteint le score de 5 points.
 ## Directives
 
 Pour ce TP la partie cliente est déjà développée.
-Vous aurez donc à charge de développer la partie back-end, c’est-à-dire le serveur Socket. Ce serveur viendra se 
+Vous aurez donc à charge le développement de la partie back-end, c’est-à-dire le serveur Socket. Ce serveur viendra se 
 greffer sur le serveur Express. Vous devrez gérer un certain nombre d’actions comme suivant :
 
 * Gérer les connexions/déconnexions clients,
@@ -43,7 +43,7 @@ yarn add -D @types/socket.io
 @ServerSettings({
     rootDir: Path.resolve(__dirname),
     componentsScan: [
-        "${rootDir}/services/**/*.js" // à rajouter
+        "./src/services/**/*.js" // à rajouter
     ]
 })
 class Server extends ServerLoader {
@@ -58,171 +58,172 @@ Ts.Ed permet de créer des plugins via des Services. Nous allons donc créer un 
 
 ```typescript
 import * as SocketIO from "socket.io";
-import {Service, OnServerReady, Inject, ExpressApplication, HttpServer} from "ts-express-decorators";
+import {HttpServer, Inject, OnServerReady, Service} from "ts-express-decorators";
 
 @Service()
 export class SocketService implements OnServerReady {
-      private io: SocketIO.Server;
-      private stacks = [];
 
-      constructor(
-          @Inject(HttpServer) private httpServer: HttpServer
-       ) {
+    private _io: SocketIO.Server;
+    private stacks = [];
 
-      }
+    constructor(@Inject(HttpServer) private httpServer: HttpServer) {
 
-      $onServerReady() {
-          this.createServer();
-      }
+    }
 
-      /**
-       * Store all callbacks that will be adding to socket.io instance when
-       *  it'll be created. See SocketService.createServer().
-       */
-      public onConnection(callback: Function): SocketService {
-          this.stacks.push(callback);
-          return this;
-      }
+    $onServerReady() {
+        this.createServer();
+    }
 
-      public emit = (...args) => this.io.emit(...args);
+    /**
+     * Store all callbacks that will be adding to socket.io instance when
+     *  it'll be created. See SocketService.createServer().
+     */
+    public onConnection(callback: Function): SocketService {
+        this.stacks.push(callback);
+        return this;
+    }
 
-      createServer()  {
-           this.io = SocketIO(this.httpServer.get());
+    public emit = (eventName: string, ...args: any[]) => this._io.emit(eventName, ...args);
 
-           // Map all callbacks to this connection events.
-           this.stacks.forEach(cb => this.io.on('connection', cb));
-      }
+    createServer() {
+        this._io = SocketIO(this.httpServer.get());
+
+        // Map all callbacks to this connection events.
+        this.stacks.forEach(cb => this._io.on("connection", cb));
+    }
+
+    get io(): SocketIO.Server {
+        return this._io;
+    }
 }
 ```
 
-> Grâce à se service nous pourrons nous abonner au événement socket.
+> Grâce à ce service, tous services ou controlleurs de notre applications peuvent s'abonner aux événements Socket.
 
 
-### Notre controller
+### SquareGameService
 
-Nous devons créer une nouvelle classe pour gérer le server Socket.io. 
-
-Voici son squelette :
+Nous allons maintenant créer notre service dédié à la gestion du jeu. Dont voici le squelette :
 
 ```typescript
-import {Controller} from "ts-express-decorators";
+import {Service} from "ts-express-decorators";
 import {$log} from "ts-log-debug";
+import {PlayerSG} from "../models/PlayerSG";
+import {SocketService} from "./SocketService";
 
-@Controller("/")
-export default class SquareGameWS {
+@Service()
+export class SquareGameService {
     /**
-     *
+     * Nb player max
      */
-    static MAX_PLAYERS: number = 2;
+    public maxPlayers: number = 4;
     /***
      *
      * @type {number}
      */
-    static SCORE_MAX: number = 10;
+    public scoreMax: number = 10;
     /**
      *
      * @type {Map<string, SocketIO.Socket>}
      */
-    static players: Map<string, PlayerSG> = new Map<string, PlayerSG>();
+    private players: Map<string, PlayerSG> = new Map<string, PlayerSG>();
     /**
      *
      */
-    static tick;
+    private tick;
 
-    private player;
+    constructor(private socketService: SocketService) {
+        socketService.onConnection(this.onConnect);
+    }
 
-    constructor (
-        private socketService: SocketService
-    ) {
-        socketService.onConnection(this.onConnection);
-    }
-    
-    @Get("/")
-    @Render("home")
-    async renderHome() {
-        return {MAX_PLAYERS, SCORE_MAX}
-    }
-    
-    onConnection = (socket) => {
-        $log.debug('New connection, ID =>', socket.id);
-        
+    private onConnect = (socket: any) => {
+        $log.debug("New connection, ID =>", socket.id);
+        const player = new PlayerSG(socket);
+
         //premier événement, ajout d'un utilisateur
-        socket.on('client.player.add', this.onAddPlayer);
 
-        //player say i'am ready
-        socket.on('client.player.ready', this.onPlayerIsReady);
+        //player say i'm ready
 
         //start interval
-        socket.on('client.start.game', this.onStartGame);
 
         //delete square
-        socket.on('client.delete.square', this.onDeleteSquare);
 
         //player disconnect
-        socket.on('disconnect', this.onDisconnect);
-    }
+    };
 
     /**
      * Ajoute une joueur à la liste des joueurs.
      * Emet l'événement 'newplayer' si le joueur vient d'être créé.
+     * @param player
      * @param name
      */
-    public onAddPlayer = (name: string): void => {};
-
-    /**
-     *
-     * @param io
-     */
-    public onStartGame = (): void => {};
+    public setPlayerName(player: PlayerSG, name: string): void { }
 
     /**
      *
      */
-    public onPlayerIsReady = (): void => {};
+    public startGame() { };
 
     /**
      *
      */
-    public onDeleteSquare = (): void => {};
+    public setPlayerReady(player: PlayerSG) { };
 
     /**
      *
      */
-    public onDisconnect = (): void => {};
+    public deleteSquare(player: PlayerSG) { };
 
     /**
      *
      */
-    public updatePlayersReady(): void {}
+    public disconnect(player: PlayerSG) { };
+
     /**
      *
      */
-    public sendSquarePosition = (): void => {};
+    public updatePlayersReady() { }
+
+    /**
+     *
+     */
+    public sendSquarePosition() { };
 
     /**
      *
      * @returns {number}
      */
-    static getNbPlayersReady(): number {
-        
-        return 0;
-    }
+    public getNbPlayersReady() { }
 
     /**
      * Retourne la liste des joueurs.
      * @returns {Array}
      */
-    static getPlayers(): PlayerSG[] {
-    
-        return null;
-    }
+    public getPlayers(): PlayerSG[] { }
 
-    static stopGame(): void {}
+    /**
+     *
+     */
+    public stopGame() { }
+}
+```
+
+Pour information PlayerSG aura les informations suivantes :
+
+- **name** (`string`): le nom du joueur,
+- **isReady** (`boolean`): L'état du joueur, 
+- **score** (`number`): Le score du joueur (en lecture seulement),
+- **id** (`string`): L'id du socket associé au joueur.
+
+```typescript
+export class PlayerSG {
+    constructor(socket: any) {}  
+    public scoreUp() {}
+    public toJSON() {}
 }
 ```
 
 Nous allons développer les méthodes nécessaires aux fonctionnement de notre jeu dans les étapes suivantes.
-
 
 ## Informations utiles
 
@@ -332,58 +333,6 @@ Indique aux clients que le jeu est stoppé suite à la déconnexion d’un joueu
 * **Paramètres** :
   *	L’utilisateur déconnecté,
   * La liste des joueurs.
-  
-### Classe de donnée PlayerSG
-
-Voici un exemple de la structure d’un joueur :
-
-```typescript
-export default class PlayerSG {
-
-    /**
-     *
-     */
-    name: string;
-    /**
-     *
-     */
-    isReady: boolean;
-    /**
-     *
-     */
-    private score: number = 0;
-
-    constructor(private userId: string) {
-
-    }
-
-    /**
-     *
-     */
-    public scoreUp(): void {
-        this.score++;
-    }
-
-    /**
-     *
-     * @returns {number}
-     */
-    public getScore(): number {
-        return this.score;
-    }
-
-    /**
-     *
-     */
-    public toJSON = (): any => ({
-        userId: this.userId,
-        name: this.name,
-        score: this.score,
-        isReady: this.isReady
-    });
-}
-```
-
 
 #### Modèle Square
 

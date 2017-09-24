@@ -14,6 +14,10 @@ Et le site sur [https://nodeandtyped.github.io/techday-node](https://nodeandtype
 - Utilisation de TypeScript côté back-end,
 - Création d'un jeu interactif avec Socket.io.
 
+## Solution
+
+La solution des TP est disponible sur la branche [solution](https://github.com/NodeAndTyped/techday-node/tree/solution).
+
 ## Auteur
 
 - Romain Lenzotti - Tech Lead front-end FullStack

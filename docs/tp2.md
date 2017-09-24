@@ -164,3 +164,25 @@ Voici ce que nous dit ce code :
 - **Paramètre** : id de type string.
 - **Type de retour**: Un calendrier.
 
+> Pour faciliter le test de votre API Rest, ts-express-decorators intègre Swagger-ui ([configuration](https://romakita.github.io/ts-express-decorators/#/tutorials/swagger)).
+
+### Exercice
+
+Nous allons créer deux controlleurs, l'une pour gérer notre page d'accueil, la seconde pour exposer
+des services Rest (ou presque).
+
+#### SquareGameCtrl
+
+Commençons par exposer les services Rest suivantes:
+
+- GET `/rest/squaregame/settings`. Ce service retournera un objet donnant la configuration du jeu que nous verrons dans le TP suivant.
+- PATCH `/rest/squaregame/settings`. Ce service permettra de patcher la configuration du jeu.
+
+#### La page d'accueil
+
+La page d'accueil sera créé avec une vue ejs ou autre. Cette vue sera placé dans le dossier
+`views`.
+
+En vous aidant de l'exemple plus haut et de la [documentation ts-express-decorators](https://romakita.github.io/ts-express-decorators/#/tutorials/templating?id=templating)
+essayez de faire votre page d'accueil (vous avez 0,00003s !). 
+
