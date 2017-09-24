@@ -7,6 +7,7 @@ export class IndexCtrl {
     constructor(private squareGameService: SquareGameService) {
 
     }
+
     @Get("/")
     @Render("index.ejs")
     async getIndex() {
@@ -14,6 +15,6 @@ export class IndexCtrl {
             appName: "SquareGame",
             MAX_PLAYERS: this.squareGameService.maxPlayers,
             SCORE_MAX: this.squareGameService.scoreMax
-        }
+        };
     }
 }

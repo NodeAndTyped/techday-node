@@ -1,10 +1,12 @@
+import {Service} from "ts-express-decorators";
 import {$log} from "ts-log-debug";
 import {PlayerSG} from "../models/PlayerSG";
 import {SocketService} from "./SocketService";
 
+@Service()
 export class SquareGameService {
     /**
-     *
+     * Nb player max
      */
     public maxPlayers: number = 4;
     /***

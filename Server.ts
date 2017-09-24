@@ -1,4 +1,8 @@
 import {GlobalAcceptMimesMiddleware, ServerLoader, ServerSettings} from "ts-express-decorators";
+import "ts-express-decorators/servestatic";
+import Path = require("path");
+
+const rootDir = Path.resolve(__dirname);
 
 @ServerSettings({
     acceptMimes: ["application/json"],
@@ -12,8 +16,8 @@ import {GlobalAcceptMimesMiddleware, ServerLoader, ServerSettings} from "ts-expr
     ],
     serveStatic: {
         "/": [
-            "${rootDir}/public",
-            "${rootDir}/node_module"
+            `${rootDir}/public`,
+            `${rootDir}/node_modules`
         ]
     }
 })
