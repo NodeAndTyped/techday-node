@@ -23,6 +23,7 @@
     "method-override": "^2.3.9",
     "serve-static": "^1.12.6",
     "socket.io": "^2.0.3",
+    "swagger-ui-express": "^2.0.8",
     "ts-express-decorators": "^2.3.6"
   },
   "devDependencies": {

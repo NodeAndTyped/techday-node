@@ -45,7 +45,7 @@ export class SquareGameService {
         socket.on("client.delete.square", () => this.deleteSquare(player));
 
         //player disconnect
-        socket.on("disconnect", this.onDisconnect);
+        socket.on("disconnect", () => this.disconnect(player));
     };
 
     /**
@@ -115,7 +115,7 @@ export class SquareGameService {
     /**
      *
      */
-    public onDisconnect(player: PlayerSG) {
+    public disconnect(player: PlayerSG) {
 
         $log.debug("Player disconnected =>", player.name, player.id);
 

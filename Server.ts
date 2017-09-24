@@ -1,24 +1,25 @@
 import {GlobalAcceptMimesMiddleware, ServerLoader, ServerSettings} from "ts-express-decorators";
 import "ts-express-decorators/servestatic";
-import Path = require("path");
-
-const rootDir = Path.resolve(__dirname);
+import "ts-express-decorators/swagger";
 
 @ServerSettings({
     acceptMimes: ["application/json"],
     debug: process.env.NODE_ENV !== "production",
     mount: {
-        "/": "${rootDir}/src/controllers/pages/**/*.js",
-        "/rest": "${rootDir}/src/controllers/rest/**/*.js"
+        "/": "./src/controllers/pages/**/*.js",
+        "/rest": "./src/controllers/rest/**/*.js"
     },
     componentsScan: [
-        "${rootDir}/src/services/**/*.js"
+        "./src/services/**/*.js"
     ],
     serveStatic: {
         "/": [
-            `${rootDir}/public`,
-            `${rootDir}/node_modules`
+            "./public",
+            "./node_modules"
         ]
+    },
+    swagger: {
+        path: "/docs"
     }
 })
 export class Server extends ServerLoader {
@@ -36,9 +37,6 @@ export class Server extends ServerLoader {
 
 
         this.set("views", "./views"); // le repertoire des vues
-        //this.engine('pug', cons.pug); // Pour PUG
-        this.engine("ejs", cons.ejs); // Pour ejs
-        //this.engine('html', cons.swig); // Pour Swig
-
+        this.engine("ejs", cons.ejs);
     }
 }
