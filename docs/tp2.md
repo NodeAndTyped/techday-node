@@ -34,6 +34,8 @@ new Server().start()
     });
 ```
 
+> Vous pouvez vérifier que le serveur s'initialiser correctement avec la commande `yarn start`.
+
 ## Les middlewares
 
 Pour que notre serveur Express.js fonctionne un peu mieux, nous allons lui ajouté des middlewares.
@@ -71,6 +73,12 @@ export class Server extends ServerLoader {
 ## Le moteur de template
 
 Bon là c'est vraiment une affaire de goût donc vous êtes libre d'utiliser le moteur de template qui vous plait.
+Il existe un module qui permet d'utiliser n'importe quel moteur de template avec Express.
+Ce module se nomme `consolidate`.
+
+```bash
+```
+
 Voici comment configurer le moteur de template avec Express et Ts.ED:
 
 ```typescript
