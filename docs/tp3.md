@@ -223,6 +223,8 @@ export class PlayerSG {
 }
 ```
 
+> La partie front est disponible via ce [lien](https://github.com/NodeAndTyped/techday-node/archive/provided.zip).
+
 Nous allons développer les méthodes nécessaires aux fonctionnement de notre jeu dans les étapes suivantes.
 
 ## Informations utiles
