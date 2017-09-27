@@ -37,6 +37,8 @@ yarn add socket.io
 yarn add -D @types/socket.io
 ```
 
+> La partie front est disponible via ce [lien](https://github.com/NodeAndTyped/techday-node/archive/provided.zip).
+
 ## Configuration du serveur
 
 ```typescript
@@ -223,7 +225,6 @@ export class PlayerSG {
 }
 ```
 
-> La partie front est disponible via ce [lien](https://github.com/NodeAndTyped/techday-node/archive/provided.zip).
 
 Nous allons développer les méthodes nécessaires aux fonctionnement de notre jeu dans les étapes suivantes.
 
@@ -233,7 +234,7 @@ Nous allons réaliser les actions de notre jeu. Vous devrez développer les év�
 
 #### Evénements entrants
 
-**client.player.add**
+**client.player.name**
 
 Cet événement gère l’ajout d’un joueur à la file d’attente. 
 Si la file d’attente est pleine, le joueur ne sera pas ajouté. 
