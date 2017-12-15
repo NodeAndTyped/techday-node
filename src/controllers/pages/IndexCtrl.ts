@@ -1,6 +1,6 @@
 import {ContentType, Controller, Get, Render} from "ts-express-decorators";
-import {SquareGameService} from "../../services/SquareGameService";
 import {Name} from "ts-express-decorators/lib/swagger";
+import {SquareGameService} from "../../services/SquareGameService";
 
 @Controller("/")
 @Name("Pages")

@@ -119,3 +119,6 @@ app.js.map
 server.js.map
 src/**/*.js
 src/**/*.js.map
+
+test/unit/**/*.js
+test/unit/**/*.js.map

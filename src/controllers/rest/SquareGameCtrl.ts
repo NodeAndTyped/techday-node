@@ -1,6 +1,6 @@
 import {BodyParams, Controller, Get, Patch} from "ts-express-decorators";
-import {SquareGameService} from "../../services/SquareGameService";
 import {SquareGameSettings} from "../../models/SquareGameSettings";
+import {SquareGameService} from "../../services/SquareGameService";
 
 @Controller("/squaregame")
 export class SquareGameCtrl {
@@ -13,15 +13,15 @@ export class SquareGameCtrl {
     getSettings(): SquareGameSettings {
         const {maxPlayers, scoreMax} = this.squareGameService;
         return {
-            nbPlayerMax: maxPlayers,
+            maxPlayers,
             scoreMax
         };
     }
 
     @Patch("/settings")
-    patchSettings(@BodyParams("nbPlayerMax") nbPlayerMax: number, @BodyParams("scoreMax") scoreMax: number): SquareGameSettings {
-        if (nbPlayerMax && nbPlayerMax >= 2) {
-            this.squareGameService.maxPlayers = nbPlayerMax;
+    patchSettings(@BodyParams("maxPlayers") maxPlayers: number, @BodyParams("scoreMax") scoreMax: number): SquareGameSettings {
+        if (maxPlayers && maxPlayers >= 2) {
+            this.squareGameService.maxPlayers = maxPlayers;
         }
 
         if (scoreMax && scoreMax >= 5) {

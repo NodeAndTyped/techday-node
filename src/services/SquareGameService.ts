@@ -1,152 +1,167 @@
-import {Service} from "ts-express-decorators";
+import {Args, Broadcast, Input, Nsp, Socket, SocketService, SocketSession} from "ts-express-decorators/socketio";
 import {$log} from "ts-log-debug";
 import {PlayerSG} from "../models/PlayerSG";
-import {SocketService} from "./SocketService";
 
-@Service()
+@SocketService("/square-game")
 export class SquareGameService {
+
+    private AUTO_INCREMENT = 0;
+
     /**
      * Nb player max
      */
-    public maxPlayers: number = 4;
+    private _maxPlayers: number = 2;
     /***
      *
      * @type {number}
      */
-    public scoreMax: number = 10;
+    private _scoreMax: number = 10;
     /**
      *
      * @type {Map<string, SocketIO.Socket>}
      */
     private players: Map<string, PlayerSG> = new Map<string, PlayerSG>();
+
+    private currentSquare: any;
     /**
      *
      */
     private tick;
 
-    constructor(private socketService: SocketService) {
-        socketService.onConnection(this.onConnect);
+    @Nsp
+    private nsp: SocketIO.Namespace;
+
+    public initGame() {
+        this.stopGame();
+        this.nsp.emit("server.init.game", {
+            "maxPlayers": this.maxPlayers,
+            "scoreMax": this.scoreMax
+        }, this.getPlayers());
     }
 
-    private onConnect = (socket: any) => {
+    /**
+     *
+     * @param { SocketIO.Socket} socket
+     * @param session
+     */
+    $onConnection(@Socket socket: SocketIO.Socket, @SocketSession session: SocketSession) {
         $log.debug("New connection, ID =>", socket.id);
-        const player = new PlayerSG(socket);
+        session.set("player", new PlayerSG(socket.id));
+    }
 
-        //premier événement, ajout d'un utilisateur
-        socket.on("client.player.name", (name: string) => this.setPlayerName(player, name));
+    /**
+     *
+     * @param { SocketIO.Socket} socket
+     */
+    $onDisconnect(@Socket socket: SocketIO.Socket) {
+        if (this.players.has(socket.id)) {
+            const player = this.players.get(socket.id);
 
-        //player say i'am ready
-        socket.on("client.player.ready", () => this.setPlayerReady(player));
+            $log.debug("Player disconnected =>", player.name, player.id);
 
-        //start interval
-        socket.on("client.start.game", () => this.startGame());
+            this.players.delete(player.id);
+            this.stopGame();
 
-        //delete square
-        socket.on("client.delete.square", () => this.deleteSquare(player));
-
-        //player disconnect
-        socket.on("disconnect", () => this.disconnect(player));
-    };
+            this.nsp.emit("server.stop.game", player, this.getPlayers());
+        }
+    }
 
     /**
      * Ajoute une joueur à la liste des joueurs.
      * Emet l'événement 'newplayer' si le joueur vient d'être créé.
-     * @param player
      * @param name
+     * @param session
      */
-    public setPlayerName(player: PlayerSG, name: string): void {
+    @Input("client.player.name")
+    @Broadcast("server.player.new")
+    public setPlayerName(@Args(0) name: string, @SocketSession session: SocketSession): PlayerSG[] {
+        const player = session.get("player");
 
         $log.debug("New player =>", name);
 
         player.name = name;
 
-        if (this.players.size === this.maxPlayers) {
+        if (this.players.size === this._maxPlayers) {
             $log.debug("stack overflow :p");
             return;
         }
 
         this.players.set(player.id, player);
-        this.socketService.emit("server.player.new", this.getPlayers());
+
+        return this.getPlayers();
     }
 
-    /**
-     *
-     */
-    public startGame() {
-        if (!this.tick) {
+    @Input("client.start.game")
+    public startGame(): void {
 
-            $log.debug("Start game");
+        try {
+            if (!this.tick) {
 
-            this.sendSquarePosition();
-            this.tick = setInterval(() => this.sendSquarePosition(), 1000);
+                $log.debug("Start game");
+
+                this.sendSquarePosition();
+                this.tick = setInterval(() => this.sendSquarePosition(), 1000);
+            }
+        } catch (er) {
+            console.error(er);
         }
     };
 
-    /**
-     *
-     */
-    public setPlayerReady(player: PlayerSG) {
+    @Input("client.player.ready")
+    @Broadcast("server.update.players.ready")
+    public setPlayerReady(@SocketSession session: SocketSession) {
+        const player = session.get("player");
 
         $log.debug(player.name + " is ready");
 
         player.isReady = true;
 
-        this.updatePlayersReady();
+        return this.updatePlayersReady();
     };
 
-    /**
-     *
-     */
-    public deleteSquare(player: PlayerSG) {
+    @Input("client.delete.square")
+    public deleteSquare(@Args(0) id: string, @Socket socket: SocketIO.Socket, @SocketSession session: SocketSession) {
+        const player = session.get("player");
         $log.debug("Player has clicked on the square =>", player.name);
-        player.scoreUp();
 
-        this.socketService.emit("server.deleted.square", this.getPlayers(), player);
+        if (id === this.currentSquare.id) {
+            player.scoreUp();
+            this.nsp.emit("server.deleted.square", this.getPlayers(), player);
+        }
 
-        if (player.score >= this.scoreMax) {
+        if (player.score >= this._scoreMax) {
 
             this.stopGame();
 
-            player.socket.broadcast.emit("server.player.loose", player);
-            player.socket.emit("server.player.win", player);
+            socket.broadcast.emit("server.player.loose", player);
+            socket.emit("server.player.win", player);
         }
-    };
-
-    /**
-     *
-     */
-    public disconnect(player: PlayerSG) {
-
-        $log.debug("Player disconnected =>", player.name, player.id);
-
-        this.players.delete(player.id);
-        this.stopGame();
-
-        this.socketService.emit("server.stop.game", player, this.getPlayers());
-
     };
 
     /**
      *
      */
     public updatePlayersReady() {
-        $log.debug("Waiting players", this.getNbPlayersReady(), "===", this.maxPlayers);
-        this.socketService.emit("server.update.players.ready", this.getPlayers());
+        $log.debug("Waiting players", this.getNbPlayersReady(), "===", this._maxPlayers);
 
-        if (+this.getNbPlayersReady() === +this.maxPlayers) {
+        if (+this.getNbPlayersReady() === +this._maxPlayers) {
             $log.debug("All players are ready");
-            this.socketService.emit("server.start.countdown");
+            this.nsp.emit("server.start.countdown");
         }
+
+        return this.getPlayers();
     }
 
     /**
      *
      */
-    public sendSquarePosition() {
+    private sendSquarePosition() {
         const index = Math.floor(Math.random() * 12),
             bgc = "#" + ((1 << 24) * Math.random() | 0).toString(16);
 
-        this.socketService.emit("server.update.square", {index, bgc});
+        this.currentSquare = {index, bgc, id: this.AUTO_INCREMENT++};
+
+        this.nsp.emit("server.update.square", this.currentSquare);
     };
 
     /**
@@ -187,4 +202,23 @@ export class SquareGameService {
         delete this.tick;
     }
 
+    get maxPlayers(): number {
+        return this._maxPlayers;
+    }
+
+    set maxPlayers(value: number) {
+        this._maxPlayers = value;
+        this.initGame();
+        this.updatePlayersReady();
+    }
+
+    get scoreMax(): number {
+        return this._scoreMax;
+    }
+
+    set scoreMax(value: number) {
+        this._scoreMax = value;
+        this.initGame();
+        this.updatePlayersReady();
+    }
 }

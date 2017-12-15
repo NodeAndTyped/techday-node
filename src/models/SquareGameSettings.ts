@@ -1,5 +1,5 @@
 
 export interface SquareGameSettings {
-    nbPlayerMax: number;
+    maxPlayers: number;
     scoreMax: number;
 }

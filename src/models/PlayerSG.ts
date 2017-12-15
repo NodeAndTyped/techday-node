@@ -12,23 +12,22 @@ export class PlayerSG {
      *
      */
     private _score: number = 0;
+
+    constructor(private _id: string) {
+    }
+
     /**
      *
+     * @returns {string}
      */
-    private _socket: any;
-
-    constructor(socket: any) {
-        this._socket = socket;
-    }
-
     get id(): string {
-        return this._socket.id;
+        return this._id;
     }
 
-    get socket(): any {
-        return this._socket;
-    }
-
+    /**
+     *
+     * @returns {number}
+     */
     get score(): number {
         return this._score;
     }
@@ -44,7 +43,7 @@ export class PlayerSG {
      *
      */
     public toJSON = () => ({
-        userId: this.id,
+        userId: this._id,
         name: this.name,
         score: this._score,
         isReady: this.isReady

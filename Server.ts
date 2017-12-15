@@ -1,10 +1,11 @@
 import {GlobalAcceptMimesMiddleware, ServerLoader, ServerSettings} from "ts-express-decorators";
 import "ts-express-decorators/servestatic";
+import "ts-express-decorators/socketio";
 import "ts-express-decorators/swagger";
 
 @ServerSettings({
     acceptMimes: ["application/json"],
-    debug: process.env.NODE_ENV !== "production",
+    debug: false,///process.env.NODE_ENV !== "production",
     mount: {
         "/": "./src/controllers/pages/**/*.js",
         "/rest": "./src/controllers/rest/**/*.js"

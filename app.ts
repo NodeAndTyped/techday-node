@@ -1,4 +1,4 @@
-import {Server} from "./server.js";
+import {Server} from "./Server.js";
 import {$log} from "ts-log-debug";
 
 new Server().start()
