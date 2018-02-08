@@ -6,5 +6,5 @@
 
 <br />
 
-[GitHub](https://github.com/NodeAndTyped/techday-node/)
+[GitHub](https://github.com/NodeLabs/techday-node/)
 [Get Started](#présentation)

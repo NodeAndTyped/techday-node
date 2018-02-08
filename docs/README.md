@@ -5,8 +5,8 @@ Node.js est une environnement très riche qui nous permet de construire aussi bi
 
 ## Support
 
-Retrouvez les slides du cours en [téléchargement](https://nodeandtyped.github.io/techday-node/_supports/slides.pptx).
-Et le site sur [https://nodeandtyped.github.io/techday-node](https://nodeandtyped.github.io/techday-node/).
+Retrouvez les slides du cours en [téléchargement](https://nodelabs.github.io/techday-node/_supports/slides.pptx).
+Et le site sur [https://nodelabs.github.io/techday-node](https://nodelabs.github.io/techday-node/).
 
 ## Objectifs
 
@@ -16,7 +16,7 @@ Et le site sur [https://nodeandtyped.github.io/techday-node](https://nodeandtype
 
 ## Solution
 
-La solution des TP est disponible sur la branche [solution](https://github.com/NodeAndTyped/techday-node/tree/solution).
+La solution des TP est disponible sur la branche [solution](https://github.com/nodelabs/techday-node/tree/solution).
 
 ## Auteur
 
